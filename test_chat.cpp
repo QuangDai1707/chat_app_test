@@ -48,7 +48,7 @@ public:
         write(to_child[WRITE_END], to_send.c_str(), to_send.size());
     }
 
-    // Wait for a specific output string, returns the full output seen
+    // Wait for output containing the expected string, returns the full output seen
     std::string wait_for_output(const std::string& expected) {
         std::string buffer;
         char temp[256];
@@ -61,8 +61,10 @@ public:
                     temp[n] = '\0';
                     buffer += temp;
                     std::cout << "Output: " << temp;
-                    if (buffer.find(expected) != std::string::npos)
+                    // Check if the output contains the expected string
+                    if (buffer.find(expected) != std::string::npos) {
                         break;
+                    }
                 }
             }
         }
@@ -90,11 +92,19 @@ int main() {
     // User 1 login
     std::cout << "\nUser 1 logging in..." << std::endl;
     user1.send_command("login");
+    user1.wait_for_output("ID:");
+    user1.send_command("user1");
+    user1.wait_for_output("Password:");
+    user1.send_command("pass1");
     user1.wait_for_output("login complete");
 
     // User 2 login
     std::cout << "\nUser 2 logging in..." << std::endl;
     user2.send_command("login");
+    user2.wait_for_output("ID:");
+    user2.send_command("user2");
+    user2.wait_for_output("Password:");
+    user2.send_command("pass2");
     user2.wait_for_output("login complete");
 
     // User 1 sends message

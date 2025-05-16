@@ -18,22 +18,30 @@ int getLineFromStdin(char *buffer) {
     return 0;
 }
 
+// Simple credential check
+int check_credentials(const char* id, const char* pw) {
+    return ( (strcmp(id, "user1") == 0 && strcmp(pw, "pass1") == 0) ||
+             (strcmp(id, "user2") == 0 && strcmp(pw, "pass2") == 0) );
+}
+
 int main(int argc, char *argv[])
 {
     char cmd[300];
- 
+    char id[300];
+    char pw[300];
+
     printStubInformation();
     fflush(stdout);
- 
+
     while (1)
     {
         printf("command(h for help)>");
         fflush(stdout);
- 
+
         memset(cmd, 0, sizeof(cmd));
         if (getLineFromStdin(cmd) == 0)
             continue;
-            
+        
         if (!strcmp("quit", cmd) || !strcmp("q", cmd))
         {
             //quit
@@ -44,9 +52,17 @@ int main(int argc, char *argv[])
         else if (!strcmp("login", cmd) || !strcmp("i", cmd))
         {
             //login
-            printf("login\n");
+            printf("ID:\n");
             fflush(stdout);
-            printf("login complete\n");
+            if (!getLineFromStdin(id)) continue;
+            printf("Password:\n");
+            fflush(stdout);
+            if (!getLineFromStdin(pw)) continue;
+            if (check_credentials(id, pw)) {
+                printf("login complete\n");
+            } else {
+                printf("login failed\n");
+            }
             fflush(stdout);
         }
         else if (!strcmp("logout", cmd) || !strcmp("t", cmd))
@@ -83,6 +99,6 @@ int main(int argc, char *argv[])
             fflush(stdout);
         }
     }
- 
+
     return 0;
 }
