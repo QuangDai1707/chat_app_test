@@ -3,34 +3,24 @@ import pexpect
 import sys
 import time
 
-def run_command(child, command, expected_output=None, timeout=30):
-    if command is not None:
-        print(f"\nExecuting command: {command}")
-        child.sendline(command)
+def run_command(child, command, expected_output=None):
+    print(f"\nExecuting command: {command}")
+    child.sendline(command)
     if expected_output:
-        try:
-            child.expect([expected_output, "command\(h for help\)>"] , timeout=timeout)
-            print(f"Output: {child.before}{child.after}")
-        except pexpect.TIMEOUT:
-            print(f"Timeout waiting for: {expected_output}")
-            print(f"Buffer: {child.before}")
-            raise
+        # Wait for output containing the expected string
+        child.expect([expected_output, "command\(h for help\)>"])
+        print(f"Output: {child.before.decode()}{child.after.decode()}")
     else:
-        try:
-            child.expect("command\(h for help\)>", timeout=timeout)
-            print(f"Output: {child.before}{child.after}")
-        except pexpect.TIMEOUT:
-            print("Timeout waiting for command prompt")
-            print(f"Buffer: {child.before}")
-            raise
+        child.expect("command\(h for help\)>")
+        print(f"Output: {child.before.decode()}{child.after.decode()}")
 
 def test_chat_program():
     try:
         # Start two instances of the chat program
         print("Starting test sequence...")
         
-        user1 = pexpect.spawn('./chat_program', encoding='utf-8', timeout=60)
-        user2 = pexpect.spawn('./chat_program', encoding='utf-8', timeout=60)
+        user1 = pexpect.spawn('./chat_program')
+        user2 = pexpect.spawn('./chat_program')
         
         # Wait for initial prompts
         print("Waiting for initial prompts...")
@@ -39,19 +29,21 @@ def test_chat_program():
         
         # User 1 login
         print("\nUser 1 logging in...")
-        run_command(user1, "login", "ID:", timeout=60)
+        run_command(user1, "login")
+        user1.expect("ID:")
         user1.sendline("user1")
-        run_command(user1, None, "Password:", timeout=60)
+        user1.expect("Password:")
         user1.sendline("pass1")
-        run_command(user1, None, "login complete", timeout=60)
+        user1.expect("login complete")
         
         # User 2 login
         print("\nUser 2 logging in...")
-        run_command(user2, "login", "ID:", timeout=60)
+        run_command(user2, "login")
+        user2.expect("ID:")
         user2.sendline("user2")
-        run_command(user2, None, "Password:", timeout=60)
+        user2.expect("Password:")
         user2.sendline("pass2")
-        run_command(user2, None, "login complete", timeout=60)
+        user2.expect("login complete")
         
         # User 1 sends message
         print("\nUser 1 sending message...")
